@@ -4,3 +4,7 @@ local/
 .env
 __pycache__/
 *.py[cod]
+.DS_Store
+
+# 本地真实配置（含账号密码与企微 Webhook），只提交 config.example.json
+config.json

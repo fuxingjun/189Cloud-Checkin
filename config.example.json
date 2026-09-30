@@ -1,0 +1,15 @@
+{
+  "accounts": [
+    {
+      "username": "YOUR_ACCOUNT_1",
+      "password": "YOUR_PASSWORD_1"
+    },
+    {
+      "username": "YOUR_ACCOUNT_2",
+      "password": "YOUR_PASSWORD_2"
+    }
+  ],
+  "wecom_webhook": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY",
+  "wecom_mention": [],
+  "request_interval": [1, 3]
+}
