@@ -17,18 +17,23 @@
 
 ## 快速开始：本地运行
 
-在项目目录中，使用与目标环境兼容的 Python 安装依赖：
+在项目目录中，使用 [uv](https://docs.astral.sh/uv/) 创建虚拟环境并安装依赖。**本地（Python 3.8+，含 3.12）请使用 `requirements-local.txt`**：
 
 ```bash
-python3 -m pip install -r requirements.txt
+uv venv                                    # 创建 .venv，可用 --python 3.12 指定解释器
+uv pip install -r requirements-local.txt
 ```
+
+`requirements.txt` 中钉定的旧版本（`requests==2.24.0` 等）仅供华为云函数的 Python 3.6 运行时使用，在 Python 3.12 上导入即报错。
 
 配置账号并运行。以下均为占位示例：
 
 ```bash
 export TY_ACCOUNTS='[{"username":"YOUR_ACCOUNT","password":"YOUR_PASSWORD"}]'
-python3 index.py
+uv run python index.py        # uv run 自动使用项目内 .venv，无需激活
 ```
+
+没有 uv 时也可以用 pip：`python3 -m pip install -r requirements-local.txt` 后激活 venv 运行。
 
 **运行会真实登录并签到；配置了 Telegram 后，还会发送汇总通知。** 程序执行一轮后退出，不内置定时调度。
 
@@ -178,7 +183,7 @@ rsa==4.7
 
 配置不合法时，`body` 返回 `ok: false`、`config_error` 和 `notification: "not_attempted"`，不会发起签到请求。
 
-本地命令正常退出同样不保证全部账号成功，应查看输出的逐账号结果和汇总。
+本地运行 `index.py` 时正常退出（退出码 0）同样不保证全部账号成功，应查看输出的逐账号结果和汇总；`local_checkin.py` 的退出码可直接判断成败（`0` 全部成功或已签，`1` 配置错误或存在失败账号），见上文「扩展入口」一节。
 
 ## 扩展入口：`local_checkin.py`（配置文件 + 企业微信）
 
@@ -221,9 +226,19 @@ cp config.example.json config.json
 
 ### 3. 运行
 
+本地依赖安装（Python 3.8+，含 3.12，推荐 [uv](https://docs.astral.sh/uv/)）：
+
 ```bash
-python3 local_checkin.py
-python3 local_checkin.py -c /path/to/config.json   # 指定配置文件位置
+uv venv
+uv pip install -r requirements-local.txt
+```
+
+**注意**：不要在本地 venv 中安装 `requirements.txt`——其中钉定的 `requests==2.24.0` 依赖 `urllib3 1.25.x`，在 Python 3.12 上导入即报 `No module named 'urllib3.packages.six.moves'`。那份钉定版本仅供华为云函数的 Python 3.6 运行时使用。
+
+```bash
+uv run python local_checkin.py
+uv run python local_checkin.py -c /path/to/config.json   # 指定配置文件位置
+# 或激活后运行：source .venv/bin/activate && python local_checkin.py
 ```
 
 默认读取**脚本同目录**下的 `config.json`，因此从任意工作目录执行都可以；`-c` 可指定其他路径。
@@ -275,7 +290,7 @@ python3 local_checkin.py -c /path/to/config.json   # 指定配置文件位置
 ## 开发与测试
 
 ```bash
-python3 -m unittest discover -s tests -v
+uv run python -m unittest discover -s tests -v
 ```
 
 测试模拟网络请求，不登录真实账号、不签到、不发送 Telegram 或企业微信消息。覆盖配置优先级、配置文件校验、账号隔离、签到状态、通知排版、企微消息体长度控制和动态内容转义等行为。
